@@ -1,14 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/ilkol/diagram-editor-backend/internal/config"
 )
 
 func main() {
+	cfg := config.MustLoad()
+
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
@@ -21,7 +25,7 @@ func main() {
 		}
 	})
 
-	if err := http.ListenAndServe(":3000", router); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), router); err != nil {
 		log.Fatalf("failed to init server: %v", err)
 	}
 }
