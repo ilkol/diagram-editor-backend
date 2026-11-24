@@ -18,7 +18,7 @@ type BoardService struct {
 	storage BoardStorage
 }
 
-func New(storage BoardStorage) *BoardService {
+func NewBoardService(storage BoardStorage) *BoardService {
 	return &BoardService{storage: storage}
 }
 

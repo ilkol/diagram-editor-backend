@@ -46,7 +46,7 @@ func main() {
 		}
 	})
 
-	boardService := service.New(store)
+	boardService := service.NewBoardService(store)
 	boardHandler := handler.NewBoardHandler(boardService)
 
 	router.Route("/boards", func(r chi.Router) {
