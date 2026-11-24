@@ -3,9 +3,11 @@ package storage
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/ilkol/diagram-editor-backend/internal/model"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -60,4 +62,21 @@ func (s *Storage) UpdateBoard(ctx context.Context, id, title string, data json.R
 		return model.ErrBoardNotFound
 	}
 	return nil
+}
+
+func (s *Storage) GetBoard(ctx context.Context, id string) (*model.Board, error) {
+	var board model.Board
+	err := s.pool.QueryRow(
+		ctx,
+		"SELECT id, title, data, created_at, updated_at FROM boards WHERE id = $1",
+		id,
+	).Scan(&board.ID, &board.Title, &board.Data, &board.CreatedAt, &board.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, model.ErrBoardNotFound
+		}
+		return nil, err
+	}
+
+	return &board, nil
 }

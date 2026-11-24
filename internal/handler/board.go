@@ -15,6 +15,7 @@ import (
 type BoardService interface {
 	Create(ctx context.Context, title string) (*model.Board, error)
 	Update(ctx context.Context, id, title string, data json.RawMessage) error
+	GetByID(ctx context.Context, id string) (*model.Board, error)
 }
 
 type BoardHandler struct {
@@ -67,4 +68,24 @@ func (h *BoardHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *BoardHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	board, err := h.service.GetByID(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, model.ErrBoardNotFound) {
+			w.WriteHeader(http.StatusNotFound)
+		} else if errors.Is(err, model.ErrInvalidBoardID) {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err = json.NewEncoder(w).Encode(board); err != nil {
+		log.Printf("failed to put model data to response: %v", err)
+	}
 }

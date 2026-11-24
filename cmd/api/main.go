@@ -51,6 +51,7 @@ func main() {
 
 	router.Route("/boards", func(r chi.Router) {
 		r.Post("/", boardHandler.Create)
+		r.Get("/{id}", boardHandler.GetByID)
 	})
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), router); err != nil {

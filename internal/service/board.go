@@ -13,6 +13,7 @@ import (
 type BoardStorage interface {
 	CreateBoard(ctx context.Context, board model.Board) error
 	UpdateBoard(ctx context.Context, id, title string, data json.RawMessage) error
+	GetBoard(ctx context.Context, id string) (*model.Board, error)
 }
 
 type BoardService struct {
@@ -55,4 +56,13 @@ func (s *BoardService) Update(ctx context.Context, id, title string, data json.R
 	}
 
 	return s.storage.UpdateBoard(ctx, id, title, data)
+}
+
+func (s *BoardService) GetByID(ctx context.Context, id string) (*model.Board, error) {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return nil, model.ErrInvalidBoardID
+	}
+
+	return s.storage.GetBoard(ctx, id)
 }
