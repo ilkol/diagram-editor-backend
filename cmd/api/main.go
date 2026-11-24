@@ -10,6 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/ilkol/diagram-editor-backend/internal/config"
+	"github.com/ilkol/diagram-editor-backend/internal/handler"
+	"github.com/ilkol/diagram-editor-backend/internal/service"
 	"github.com/ilkol/diagram-editor-backend/internal/storage"
 )
 
@@ -42,6 +44,13 @@ func main() {
 			log.Printf("failed to write response: %v", err)
 			return
 		}
+	})
+
+	boardService := service.New(store)
+	boardHandler := handler.NewBoardHandler(boardService)
+
+	router.Route("/boards", func(r chi.Router) {
+		r.Post("/", boardHandler.Create)
 	})
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), router); err != nil {
