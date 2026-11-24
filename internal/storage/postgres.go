@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
+	"time"
 
 	"github.com/ilkol/diagram-editor-backend/internal/model"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -46,4 +48,16 @@ func (s *Storage) CreateBoard(ctx context.Context, board model.Board) error {
 		board.ID, board.Title, board.Data, board.CreatedAt, board.UpdatedAt)
 
 	return err
+}
+
+func (s *Storage) UpdateBoard(ctx context.Context, id, title string, data json.RawMessage) error {
+	cmdTag, err := s.pool.Exec(ctx, "UPDATE boards SET title=$1, data=$2, updated_at=$3 WHERE id=$3",
+		title, data, time.Now().UTC(), id)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return model.ErrBoardNotFound
+	}
+	return nil
 }
